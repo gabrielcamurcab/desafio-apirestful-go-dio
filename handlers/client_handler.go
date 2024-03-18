@@ -1,75 +1,18 @@
-package main
+package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
+	"minhaapi/database"
+	"minhaapi/models"
 	"net/http"
-	"os"
 	"strconv"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
-// Client representa um cliente
-type Client struct {
-	ID    int    `json:"id"`
-	Nome  string `json:"nome"`
-	Idade int    `json:"idade"`
-}
-
-func main() {
-	// Carregar variáveis de ambiente do arquivo .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Erro ao carregar arquivo .env")
-	}
-
-	// Iniciar o servidor HTTP
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" // Porta padrão
-	}
-	serverAddr := fmt.Sprintf(":%s", port)
-	fmt.Printf("Servidor iniciado na porta %s\n", port)
-	log.Fatal(http.ListenAndServe(serverAddr, router()))
-}
-
-// ConnectDB cria e retorna uma conexão com o banco de dados
-func ConnectDB() (*sql.DB, error) {
-	// Obter informações de conexão do arquivo .env
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-
-	// Construir string de conexão
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
-
-	// Abrir conexão com o banco de dados
-	db, err := sql.Open("mysql", dataSourceName)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func router() *mux.Router {
-	r := mux.NewRouter()
-	r.HandleFunc("/cliente", createClient).Methods("POST")
-	r.HandleFunc("/cliente", getClients).Methods("GET")
-	r.HandleFunc("/cliente/{id}", getClientById).Methods("GET")
-	return r
-}
-
-func createClient(w http.ResponseWriter, r *http.Request) {
+func CreateClient(w http.ResponseWriter, r *http.Request) {
 	// Decodificar o corpo da solicitação em um struct Client
-	var newClient Client
+	var newClient models.Client
 	err := json.NewDecoder(r.Body).Decode(&newClient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -77,7 +20,7 @@ func createClient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Conectar ao banco de dados
-	db, err := ConnectDB()
+	db, err := database.ConnectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -112,8 +55,8 @@ func createClient(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Registro criado com sucesso!", "id": strconv.FormatInt(newID, 10)})
 }
 
-func getClients(w http.ResponseWriter, r *http.Request) {
-	db, err := ConnectDB()
+func GetClients(w http.ResponseWriter, r *http.Request) {
+	db, err := database.ConnectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -127,9 +70,9 @@ func getClients(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	clients := []Client{}
+	clients := []models.Client{}
 	for rows.Next() {
-		var client Client
+		var client models.Client
 		if err := rows.Scan(&client.ID, &client.Nome, &client.Idade); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -144,11 +87,11 @@ func getClients(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getClientById(w http.ResponseWriter, r *http.Request) {
+func GetClientById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	clientId := params["id"]
 
-	db, err := ConnectDB()
+	db, err := database.ConnectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -169,10 +112,10 @@ func getClientById(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var clientes []Client
+	var clientes []models.Client
 
 	for rows.Next() {
-		var cliente Client
+		var cliente models.Client
 		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
