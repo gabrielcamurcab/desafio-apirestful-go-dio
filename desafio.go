@@ -61,7 +61,8 @@ func ConnectDB() (*sql.DB, error) {
 
 func router() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/cliente", createClient).Methods("POST") // Rota para adicionar um novo cliente
+	r.HandleFunc("/cliente", createClient).Methods("POST")
+	r.HandleFunc("/cliente", getClients).Methods("GET")
 	return r
 }
 
@@ -108,4 +109,36 @@ func createClient(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	// Retornar o ID do novo cliente como resposta
 	json.NewEncoder(w).Encode(map[string]string{"message": "Registro criado com sucesso!", "id": strconv.FormatInt(newID, 10)})
+}
+
+func getClients(w http.ResponseWriter, r *http.Request) {
+	db, err := ConnectDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM clientes")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	clients := []Client{}
+	for rows.Next() {
+		var client Client
+		if err := rows.Scan(&client.ID, &client.Nome, &client.Idade); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		clients = append(clients, client)
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(clients); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
