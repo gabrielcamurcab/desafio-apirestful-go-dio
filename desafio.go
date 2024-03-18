@@ -63,6 +63,7 @@ func router() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/cliente", createClient).Methods("POST")
 	r.HandleFunc("/cliente", getClients).Methods("GET")
+	r.HandleFunc("/cliente/{id}", getClientById).Methods("GET")
 	return r
 }
 
@@ -138,6 +139,55 @@ func getClients(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	if err := json.NewEncoder(w).Encode(clients); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func getClientById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	clientId := params["id"]
+
+	db, err := ConnectDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("SELECT * FROM clientes WHERE id = ?")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(clientId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var clientes []Client
+
+	for rows.Next() {
+		var cliente Client
+		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		clientes = append(clientes, cliente)
+	}
+
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(clientes[0]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
