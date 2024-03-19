@@ -135,3 +135,35 @@ func GetClientById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func DeleteClientById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	clientId := params["id"]
+
+	db, err := database.ConnectDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("DELETE FROM clientes WHERE id = ?")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Query(clientId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer result.Close()
+
+	w.Header().Set("Content-type", "application/json")
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Registro excluído com sucesso!"}); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

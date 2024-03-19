@@ -36,5 +36,6 @@ func router() *mux.Router {
 	r.HandleFunc("/cliente", handlers.CreateClient).Methods("POST")
 	r.HandleFunc("/cliente", handlers.GetClients).Methods("GET")
 	r.HandleFunc("/cliente/{id}", handlers.GetClientById).Methods("GET")
+	r.HandleFunc("/cliente/{id}", handlers.DeleteClientById).Methods("DELETE")
 	return r
 }
