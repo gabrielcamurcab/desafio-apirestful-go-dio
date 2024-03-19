@@ -167,3 +167,44 @@ func DeleteClientById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func UpdateClient(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	clientId := params["id"]
+
+	var newClient models.Client
+	err := json.NewDecoder(r.Body).Decode(&newClient)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Conectar ao banco de dados
+	db, err := database.ConnectDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Preparar a declaração SQL para inserir o novo cliente na tabela "cliente"
+	stmt, err := db.Prepare("UPDATE clientes SET nome = ?, idade = ? WHERE id = ?")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	// Executar a declaração SQL para adicionar o novo cliente
+	result, err := stmt.Query(newClient.Nome, newClient.Idade, clientId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer result.Close()
+
+	// Definir o cabeçalho Content-Type como application/json
+	w.Header().Set("Content-Type", "application/json")
+	// Retornar o ID do novo cliente como resposta
+	json.NewEncoder(w).Encode(map[string]string{"message": "Registro atualizado com sucesso!"})
+}
