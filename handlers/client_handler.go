@@ -4,14 +4,17 @@ import (
 	"encoding/json"
 	"minhaapi/database"
 	"minhaapi/models"
+	"minhaapi/utils"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 func CreateClient(w http.ResponseWriter, r *http.Request) {
-	// Decodificar o corpo da solicitação em um struct Client
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var newClient models.Client
 	err := json.NewDecoder(r.Body).Decode(&newClient)
 	if err != nil {
@@ -56,6 +59,11 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetClients(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	db, err := database.ConnectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -88,8 +96,12 @@ func GetClients(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetClientById(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	clientId := params["id"]
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	clientId := utils.GetURLParam(r.URL.Path)
 
 	db, err := database.ConnectDB()
 	if err != nil {
@@ -130,6 +142,12 @@ func GetClientById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-type", "application/json")
+
+	if len(clientes) == 0 {
+		json.NewEncoder(w).Encode(map[string]string{"message": "Cliente não encontrado"})
+		return
+	}
+
 	if err := json.NewEncoder(w).Encode(clientes[0]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -137,8 +155,12 @@ func GetClientById(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteClientById(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	clientId := params["id"]
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	clientId := utils.GetURLParam(r.URL.Path)
 
 	db, err := database.ConnectDB()
 	if err != nil {
@@ -169,8 +191,12 @@ func DeleteClientById(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateClient(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	clientId := params["id"]
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	clientId := utils.GetURLParam(r.URL.Path)
 
 	var newClient models.Client
 	err := json.NewDecoder(r.Body).Decode(&newClient)
