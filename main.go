@@ -19,7 +19,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "3000"
 	}
 	serverAddr := fmt.Sprintf(":%s", port)
 	fmt.Printf("Servidor iniciado na porta %s\n", port)
