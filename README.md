@@ -10,7 +10,7 @@ A API consulta uma tabela chamada "clientes" em um banco de dados, onde cada cli
 
 1. Certifique-se de ter o Go instalado em seu sistema. Você pode baixá-lo em [golang.org](https://golang.org/).
 
-2. Clone este repositório: git clone https://github.com/seu-usuario/seu-repositorio.git
+2. Clone este repositório: git clone https://github.com/gabrielcamurcab/desafio-apirestful-go-dio
 
 3. Navegue até o diretório do projeto: cd desafio-apirestful-go-dio
 
