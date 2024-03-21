@@ -1,6 +1,6 @@
 module minhaapi
 
-go 1.19.13
+go 1.19
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
