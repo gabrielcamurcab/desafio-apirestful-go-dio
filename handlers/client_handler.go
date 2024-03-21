@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"minhaapi/database"
 	"minhaapi/models"
+	"minhaapi/repo"
 	"minhaapi/utils"
 	"net/http"
 	"strconv"
@@ -22,7 +23,6 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Conectar ao banco de dados
 	db, err := database.ConnectDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -30,31 +30,12 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// Preparar a declaração SQL para inserir o novo cliente na tabela "cliente"
-	stmt, err := db.Prepare("INSERT INTO clientes(nome, idade) VALUES(?, ?)")
+	newID, err := repo.CreateClient(db, newClient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer stmt.Close()
-
-	// Executar a declaração SQL para adicionar o novo cliente
-	result, err := stmt.Exec(newClient.Nome, newClient.Idade)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 
-	// Obter o ID do novo cliente adicionado
-	newID, err := result.LastInsertId()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Definir o cabeçalho Content-Type como application/json
 	w.Header().Set("Content-Type", "application/json")
-	// Retornar o ID do novo cliente como resposta
 	json.NewEncoder(w).Encode(map[string]string{"message": "Registro criado com sucesso!", "id": strconv.FormatInt(newID, 10)})
 }
 
