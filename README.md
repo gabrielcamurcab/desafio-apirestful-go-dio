@@ -21,10 +21,10 @@ Agora a API estará sendo executada em `http://localhost:3000`.
 
 ## Rotas Disponíveis
 
-- **GET /cliente/get**: Retorna todos os clientes da tabela "clientes".
-- **GET /cliente/get/{id}**: Retorna um cliente específico com o ID fornecido.
-- **POST /cliente/store**: Cria um novo cliente com base nos dados fornecidos.
-- **DELETE /cliente/drop/{id}**: Exclui um cliente específico com o ID fornecido.
-- **PUT /cliente/update/{id}**: Atualiza os dados de um cliente específico com o ID fornecido.
+- **GET /client**: Retorna todos os clientes da tabela "clientes".
+- **GET /client/{id}**: Retorna um cliente específico com o ID fornecido.
+- **POST /client**: Cria um novo cliente com base nos dados fornecidos.
+- **DELETE /client/{id}**: Exclui um cliente específico com o ID fornecido.
+- **PUT /client/{id}**: Atualiza os dados de um cliente específico com o ID fornecido.
 
 Lembre-se de substituir `{id}` pelo ID real do cliente ao fazer requisições para as rotas que exigem um ID.
