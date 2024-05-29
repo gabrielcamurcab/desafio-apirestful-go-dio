@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"minhaapi/database"
 	"minhaapi/models"
-	"minhaapi/repo"
+	"minhaapi/repository"
 	"minhaapi/utils"
 	"net/http"
 	"strconv"
@@ -30,7 +30,7 @@ func CreateClient(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	newID, err := repo.CreateClient(db, newClient)
+	newID, err := repository.CreateClient(db, newClient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -52,21 +52,9 @@ func GetClients(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM clientes")
+	clients, err := repository.GetClients(db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	clients := []models.Client{}
-	for rows.Next() {
-		var client models.Client
-		if err := rows.Scan(&client.ID, &client.Nome, &client.Idade); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		clients = append(clients, client)
 	}
 
 	w.Header().Set("Content-type", "application/json")

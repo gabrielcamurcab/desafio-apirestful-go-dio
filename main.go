@@ -8,6 +8,7 @@ import (
 
 	"minhaapi/handlers"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -27,11 +28,11 @@ func main() {
 }
 
 func router() http.Handler {
-	r := http.NewServeMux()
-	r.HandleFunc("/cliente/store", handlers.CreateClient)
-	r.HandleFunc("/cliente/get", handlers.GetClients)
-	r.HandleFunc("/cliente/get/{id}", handlers.GetClientById)
-	r.HandleFunc("/cliente/drop/{id}", handlers.DeleteClientById)
-	r.HandleFunc("/cliente/update/{id}", handlers.UpdateClient)
+	r := mux.NewRouter()
+	r.HandleFunc("/client", handlers.CreateClient).Methods("POST")
+	r.HandleFunc("/client", handlers.GetClients).Methods("GET")
+	r.HandleFunc("/client/{id}", handlers.GetClientById).Methods("GET")
+	r.HandleFunc("/client/{id}", handlers.DeleteClientById).Methods("DELETE")
+	r.HandleFunc("/client/{id}", handlers.UpdateClient).Methods("PUT")
 	return r
 }
