@@ -97,7 +97,7 @@ func GetClientById(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var cliente models.Client
-		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade)
+		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade, &cliente.Created_at, &cliente.Updated_at)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

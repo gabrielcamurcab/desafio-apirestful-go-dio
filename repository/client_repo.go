@@ -29,11 +29,11 @@ func GetClients(db *sql.DB) ([]models.Client, error) {
 
 	clients := []models.Client{}
 	for rows.Next() {
-		var client models.Client
-		if err := rows.Scan(&client.ID, &client.Nome, &client.Idade); err != nil {
+		var cliente models.Client
+		if err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade, &cliente.Created_at, &cliente.Updated_at); err != nil {
 			return nil, err
 		}
-		clients = append(clients, client)
+		clients = append(clients, cliente)
 	}
 
 	return clients, nil
@@ -56,7 +56,7 @@ func GetClientById(db *sql.DB, id string) ([]models.Client, error) {
 
 	for rows.Next() {
 		var cliente models.Client
-		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade)
+		err := rows.Scan(&cliente.ID, &cliente.Nome, &cliente.Idade, &cliente.Created_at, &cliente.Updated_at)
 		if err != nil {
 			return nil, err
 		}
